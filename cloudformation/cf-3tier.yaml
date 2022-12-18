@@ -1,0 +1,583 @@
+Parameters:
+  PublicKey:
+    Description: Name of an existing EC2 KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  PrivateKey:
+    Description: Name of an existing EC2 KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  LatestAmiId:
+    Description: Select AMI
+    Type: List<AWS::EC2::Image::Id>
+    Default: ami-0eddbd81024d3fbdd
+
+Resources:
+  # 1. vpc
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-vpc"
+
+  # 2. internet gateway
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-igw"
+
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref IGW
+      VpcId: !Ref VPC
+
+  # 3. route table
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: public-rt
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+
+  PrivateRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: private-rt
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    DependsOn: NGW
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref NGW
+
+  # 4. Subnet
+  # 4-1. public subnet
+  PublicSN1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.1.0/24
+      Tags:
+        - Key: Name
+          Value: pub-subnet1
+
+  PublicSN2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.11.0/24
+      Tags:
+        - Key: Name
+          Value: pub-subnet2
+
+  PublicSNRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSN1
+
+  PublicSNRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSN2
+
+  # 4-2. private subnet
+  # 4-2-1. web server
+  PrivateSN1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.2.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet1
+
+  PrivateSN2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.3.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet2
+
+  PrivateSNRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN1
+
+  PrivateSNRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN2
+
+  # 4-2-2. was server
+  PrivateSN3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.4.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet3
+
+  PrivateSN4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.12.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet4
+
+  PrivateSNRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN3
+
+  PrivateSNRouteTableAssociation4:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN4
+
+  # 4-2-3. db server
+  PrivateSN5:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.13.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet5
+
+  PrivateSN6:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.14.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet6
+
+  PrivateSNRouteTableAssociation5:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN5
+
+  PrivateSNRouteTableAssociation6:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN6
+
+  # 5. security group
+  # 5-1. bastion security group
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access via port 80 and SSH access via port 22
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: bastion-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort: "80"
+          CidrIp: 122.40.219.171/32
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: 0.0.0.0/0
+
+  # 5-2. ex-lb security group
+  EXLBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access via port 80
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: exlb-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort: "80"
+          CidrIp: 0.0.0.0/0
+
+  # 5-3. web security group
+  WebSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access via EXLB and Bastion
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: web-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort: "80"
+          SourceSecurityGroupId: !Ref EXLBSG
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          SourceSecurityGroupId: !Ref BastionSG
+
+  # 5-4. in-lb security group
+  INLBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access via web
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: inlb-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "8080"
+          ToPort: "8080"
+          SourceSecurityGroupId: !Ref WebSG
+
+  # 5-5. was security group
+  WasSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access via INLB and Bastion
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: was-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "8080"
+          ToPort: "8080"
+          SourceSecurityGroupId: !Ref INLBSG
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          SourceSecurityGroupId: !Ref BastionSG
+
+  # 5-6. db security group
+  DBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access MySQL and Bastion
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: db-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "3306"
+          ToPort: "3306"
+          SourceSecurityGroupId: !Ref WasSG
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          SourceSecurityGroupId: !Ref BastionSG
+
+  # 6. EC2 instance
+  # 6-1. bastion host
+  BastionEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PublicKey
+      Tags:
+        - Key: Name
+          Value: bastion host
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: BastionSG
+          SubnetId: !Ref PublicSN1
+
+  # 6-2. web server
+  Web1EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-web1"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WebSG
+          SubnetId: !Ref PrivateSN1
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          hostname ELB-Web1EC2
+          sudo yum install httpd -y
+          sudo systemctl start httpd
+          echo "<h1>Web Server 1</h1>" > /var/www/html/index.html
+
+  Web2EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-web2"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WebSG
+          SubnetId: !Ref PrivateSN2
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          hostname ELB-Web2EC2
+          sudo yum install httpd -y
+          sudo systemctl start httpd
+          echo "<h1>Web Server 2</h1>" > /var/www/html/index.html
+
+  # 6-3. was server
+  Was1EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-was1"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WasSG
+          SubnetId: !Ref PrivateSN3
+
+  Was2EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-was2"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WasSG
+          SubnetId: !Ref PrivateSN4
+
+  # 6-4. db server
+  DB1EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-db1"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: DBSG
+          SubnetId: !Ref PrivateSN5
+
+  DB2EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-db2"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: DBSG
+          SubnetId: !Ref PrivateSN6
+
+  # 7. EIP
+  # 7-1. nat gateway
+  EIPforNat:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NGW:
+    Type: AWS::EC2::NatGateway
+    DependsOn: IGWAttachment
+    Properties:
+      AllocationId: !GetAtt EIPforNat.AllocationId
+      SubnetId: !Ref PublicSN1
+      Tags:
+        - Key: Name
+          Value: 3tier-nat
+
+  # 8. load balancer
+  # 8-1. external load balancer
+  ExLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: external-lb
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref EXLBSG
+      Subnets:
+        - !Ref PublicSN1
+        - !Ref PublicSN2
+
+  EXLBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthyThresholdCount: 3
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      Name: exlb-target
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      Targets:
+        - Id: !Ref Web1EC2
+          Port: 80
+        - Id: !Ref Web2EC2
+          Port: 80
+
+  EXLBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref EXLBTargetGroup
+      LoadBalancerArn: !Ref ExLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # 8-2. internal load balancer
+  INLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: internall-lb
+      Scheme: internal
+      SecurityGroups:
+        - !Ref INLBSG
+      Subnets:
+        - !Ref PrivateSN1
+        - !Ref PrivateSN2
+
+  INLBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthyThresholdCount: 3
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      Name: inlb-target
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      Targets:
+        - Id: !Ref Was1EC2
+          Port: 8080
+        - Id: !Ref Was2EC2
+          Port: 8080
+
+  INLBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref INLBTargetGroup
+      LoadBalancerArn: !Ref INLoadBalancer
+      Port: 8080
+      Protocol: HTTP
