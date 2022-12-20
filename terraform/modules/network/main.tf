@@ -7,6 +7,51 @@ resource "aws_vpc" "tf-vpc" {
   }
 }
 
+# public subnet
+resource "aws_subnet" "public_subnet" {
+  count = "${length(var.availability_zone)}"
+  vpc_id = aws_vpc.tf-vpc.id
+  availability_zone = "${element(var.availability_zone, count.index)}"
+  cidr_block = "${cidrsubnet(var.vpc_cidr, 8, count.index+1)}"
+  tags = { 
+    Name = "pub-subnet${count.index+1}"
+  }
+}
+
+# web private subnet
+resource "aws_subnet" "web_subnet" {
+  count = "${length(var.availability_zone)}"
+  vpc_id = aws_vpc.tf-vpc.id
+  availability_zone = "${element(var.availability_zone, count.index)}"
+  cidr_block = "${cidrsubnet(var.vpc_cidr, 8, count.index+11)}"
+  tags = { 
+    Name = "pri-subnet${count.index+1}"
+  }
+}
+
+# was private subnet
+resource "aws_subnet" "was_subnet" {
+  count = "${length(var.availability_zone)}"
+  vpc_id = aws_vpc.tf-vpc.id
+  availability_zone = "${element(var.availability_zone, count.index)}"
+  cidr_block = "${cidrsubnet(var.vpc_cidr, 8, count.index+21)}"
+  tags = { 
+    Name = "pri-subnet${count.index+3}"
+  }
+}
+
+# rds private subnet
+resource "aws_subnet" "rds_subnet" {
+  count = "${length(var.availability_zone)}"
+  vpc_id = aws_vpc.tf-vpc.id
+  availability_zone = "${element(var.availability_zone, count.index)}"
+  cidr_block = "${cidrsubnet(var.vpc_cidr, 8, count.index+31)}"
+  tags = { 
+    Name = "pri-subnet${count.index+5}"
+  }
+}
+
+# internet gateway
 resource "aws_internet_gateway" "tf-igw" {
   vpc_id = aws_vpc.tf-vpc.id
 
@@ -15,17 +60,26 @@ resource "aws_internet_gateway" "tf-igw" {
   }
 }
 
-data "aws_availability_zones" "available" {
-  state = "available"
+# eip for ngw
+resource "aws_eip" "tf-eip" {
+  vpc      = true
+  depends_on = [
+    aws_internet_gateway.tf-igw
+  ]
+
+  tags = {
+    Name = "${var.env}-eip"
+  }
 }
 
-# public subnet 2
-resource "aws_subnet" "public-subnet" {
-  count = "${length(var.availability_zone)}"
-  vpc_id = aws_vpc.tf-vpc.id
-  availability_zone = "${element(var.availability_zone, count.index)}"
-  cidr_block = "${cidrsubnet(var.vpc_cidr, 8, count.index)}"
-  tags = { 
-    Name = "pub-subnet${count.index}"
+# nat gateway
+resource "aws_nat_gateway" "tf-nat" {
+  allocation_id = aws_eip.tf-eip.id
+  subnet_id     = aws_subnet.public_subnet[0].id
+
+  tags = {
+    Name = "${var.env}-nat"
   }
+
+  depends_on = [aws_internet_gateway.tf-igw]
 }

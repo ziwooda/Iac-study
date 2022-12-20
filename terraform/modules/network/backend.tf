@@ -1,11 +1,11 @@
-# backend for network resources
+# # backend for network resources
 
-terraform {
-  backend "aws_s3_bucket_versioning" {
-    bucket = "${var.env}-${var.user_name}-terraform-remote-state"
-    key = "modules/network/terraform.tfstate"
-    region = "ap-northeast-2"
-    encrypt = true
-    dynamodb-table = "terraform-lock"
-  }
-}
+# terraform {
+#   backend "s3" {
+#     bucket = "${var.env}-${var.user_name}-terraform-remote-state"
+#     key = "modules/network/terraform.tfstate"
+#     region = "ap-northeast-2"
+#     encrypt = true
+#     dynamodb-table = "terraform-lock"
+#   }
+# }
