@@ -47,4 +47,3 @@ output "rds_subnet_cidr_block" {
   value = [aws_subnet.rds_subnet[*].cidr_block]
   description = "cidr block of rds subnet"
 }
-
