@@ -21,5 +21,5 @@ variable "vpc_cidr_block" {
 variable "azs" {
   description = "availability zone in Seoul"
   type = list
-  default = ["ap-northeast-2a", "ap-northeast-2c"]
+  # default = ["ap-northeast-2a", "ap-northeast-2c"]
 }

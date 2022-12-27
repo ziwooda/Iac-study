@@ -83,3 +83,54 @@ resource "aws_nat_gateway" "tf-nat" {
 
   depends_on = [aws_internet_gateway.tf-igw]
 }
+
+# route table & association
+resource "aws_route_table" "tf-pub-rt" {
+  vpc_id = aws_vpc.tf-vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.tf-igw.id
+  }
+
+  tags = {
+    Name = "pub-rt"
+  }
+}
+
+resource "aws_route_table" "tf-pri-rt" {
+  vpc_id = aws_vpc.tf-vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.tf-nat.id
+  }
+
+  tags = {
+    Name = "pri-rt"
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  count = length(var.availability_zone)
+  subnet_id = "${element(aws_subnet.public_subnet.*.id, count.index)}"
+  route_table_id = aws_route_table.tf-pub-rt.id
+}
+
+resource "aws_route_table_association" "web_private" {
+  count = "${length(var.availability_zone)}"
+  subnet_id = "${element(aws_subnet.web_subnet.*.id, count.index)}"
+  route_table_id = aws_route_table.tf-pri-rt.id
+}
+
+resource "aws_route_table_association" "was_private" {
+  count = "${length(var.availability_zone)}"
+  subnet_id = "${element(aws_subnet.was_subnet.*.id, count.index)}"
+  route_table_id = aws_route_table.tf-pri-rt.id
+}
+
+resource "aws_route_table_association" "rds_private" {
+  count = "${length(var.availability_zone)}"
+  subnet_id = "${element(aws_subnet.rds_subnet.*.id, count.index)}"
+  route_table_id = aws_route_table.tf-pri-rt.id
+}
