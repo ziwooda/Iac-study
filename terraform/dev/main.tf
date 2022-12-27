@@ -13,3 +13,8 @@ module "network" {
     cidr_block = var.vpc_cidr_block
     availability_zone = var.azs
 }
+
+module "sg" {
+    source = "../modules/sg"
+    vpc_id = module.network.vpc_id
+}
