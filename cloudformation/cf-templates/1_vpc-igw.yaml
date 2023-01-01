@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for VPC
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-vpc"
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-igw"
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+
+Outputs:
+  outputVPC:
+    Description: Reference of VPC
+    Value: !Ref VPC
+  outputIGW:
+    Description: Reference of IGW
+    Value: !Ref IGW

@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for eip and nat gateway
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+  PublicSN1:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+  EIPforNat:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NGW:
+    Type: AWS::EC2::NatGateway
+    # DependsOn: IGWAttachment
+    Properties:
+      AllocationId: !GetAtt EIPforNat.AllocationId
+      SubnetId: !Ref PublicSN1
+      Tags:
+        - Key: Name
+          Value: dev-ngw
+
+Outputs:
+  outputNGW:
+    Description: Reference of nat gateway
+    Value: !Ref NGW
