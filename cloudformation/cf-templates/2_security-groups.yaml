@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for security groups
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access via port 80 and SSH access via port 22
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: bastion-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort: "80"
+          CidrIp: 122.40.219.171/32
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: 0.0.0.0/0
+  EXLBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access via port 80
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: exlb-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort: "80"
+          CidrIp: 0.0.0.0/0
+  WebSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access via EXLB and Bastion
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: web-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort: "80"
+          SourceSecurityGroupId: !Ref EXLBSG
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          SourceSecurityGroupId: !Ref BastionSG
+  INLBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access via web
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: inlb-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "8080"
+          ToPort: "8080"
+          SourceSecurityGroupId: !Ref WebSG
+  WasSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access via INLB and Bastion
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: was-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "8080"
+          ToPort: "8080"
+          SourceSecurityGroupId: !Ref INLBSG
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          SourceSecurityGroupId: !Ref BastionSG
+  DBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access MySQL and Bastion
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: db-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "3306"
+          ToPort: "3306"
+          SourceSecurityGroupId: !Ref WasSG
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          SourceSecurityGroupId: !Ref BastionSG
+
+Outputs:
+  outputBastionSG:
+    Description: Reference of security group of bastion host
+    Value: !Ref BastionSG
+  outputEXLBSG:
+    Description: Reference of security group of external load balancer
+    Value: !Ref EXLBSG
+  outputWebSG:
+    Description: Reference of security group of web server
+    Value: !Ref WebSG
+  outputINLBSG:
+    Description: Reference of security group of internal load balancer
+    Value: !Ref INLBSG
+  outputWasSG:
+    Description: Reference of security group of was server
+    Value: !Ref WasSG
+  outputDBSG:
+    Description: Reference of security group of db server
+    Value: !Ref DBSG

@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for routing tables
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+  IGW:
+    Description: Select an existing internet gateway
+    Type: String
+    Default: "<internet-gateway-ID>" # should be modified when deploying new igw stack
+  NGW:
+    Description: Select an existing nat gateway
+    Type: String
+    Default: "<nat-gateway-ID>" # should be modified when deploying new ngw stack
+  PublicSN1:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PublicSN2:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN1:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN2:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN3:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN4:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN5:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN6:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: public-rt
+  PublicRoute:
+    Type: AWS::EC2::Route
+    # DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+  PrivateRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: private-rt
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    # DependsOn: NGW
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NGW
+
+  PublicSNRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSN1
+  PublicSNRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRT
+      SubnetId: !Ref PublicSN2
+
+  PrivateSNRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN1
+  PrivateSNRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN2
+  PrivateSNRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN3
+  PrivateSNRouteTableAssociation4:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN4
+  PrivateSNRouteTableAssociation5:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN5
+  PrivateSNRouteTableAssociation6:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      SubnetId: !Ref PrivateSN6
+
+Outputs:
+  outputPublicRT:
+    Description: Reference for public route table
+    Value: !Ref PublicRT
+  outputPublicRoute:
+    Description: Reference for public route
+    Value: !Ref PublicRoute
+  outputPrivateRT:
+    Description: Reference for private route table
+    Value: !Ref PrivateRT
+  outputPrivateRoute:
+    Description: Reference for private route
+    Value: !Ref PrivateRoute

@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for public subnets
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  PublicSN1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.1.0/24
+      Tags:
+        - Key: Name
+          Value: pub-subnet1
+  PublicSN2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.11.0/24
+      Tags:
+        - Key: Name
+          Value: pub-subnet2
+
+Outputs:
+  outputPublicSN1:
+    Description: Reference of public subnet1
+    Value: !Ref PublicSN1
+  outputPublicSN2:
+    Description: Reference of public subnet2
+    Value: !Ref PublicSN2

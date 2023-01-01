@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for private subnets
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  PrivateSN1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.2.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet1
+  PrivateSN2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.3.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet2
+  PrivateSN3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.4.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet3
+  PrivateSN4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.12.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet4
+  PrivateSN5:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-2a
+      CidrBlock: 10.0.13.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet5
+  PrivateSN6:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.14.0/24
+      Tags:
+        - Key: Name
+          Value: pri-subnet6
+
+Outputs:
+  outputPrivateSN1:
+    Description: Reference of private subnet1
+    Value: !Ref PrivateSN1
+  outputPrivateSN2:
+    Description: Reference of private subnet2
+    Value: !Ref PrivateSN2
+  outputPrivateSN3:
+    Description: Reference of private subnet3
+    Value: !Ref PrivateSN3
+  outputPrivateSN4:
+    Description: Reference of private subnet4
+    Value: !Ref PrivateSN4
+  outputPrivateSN5:
+    Description: Reference of private subnet5
+    Value: !Ref PrivateSN5
+  outputPrivateSN6:
+    Description: Reference of private subnet6
+    Value: !Ref PrivateSN6
