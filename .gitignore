@@ -4,4 +4,5 @@ terraform.tfstate
 terraform.tfstate.backup
 .terraform.tfstate.lock.info
 .DS_Store
-melody-tf-key.pem
+tf-private-key.pem
+tf-public-key.pem

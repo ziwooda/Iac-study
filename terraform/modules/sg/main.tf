@@ -1,4 +1,14 @@
-# bastion-sg
+# bastion host security group
+resource "aws_security_group" "bastion-sg" {
+  name        = "bastion-sg"
+  description = "security group of bastion host"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "bastion-sg"
+  }
+}
+
 data "http" "my_public_ip" {
   url = "https://ipv4.icanhazip.com/"
 }
@@ -36,7 +46,17 @@ resource "aws_security_group_rule" "bastion-egress" {
   lifecycle { create_before_destroy = true }
 }
 
-# exlb-sg
+# external load balancer security group
+resource "aws_security_group" "exlb-sg" {
+  name        = "exlb-sg"
+  description = "security group of external load balancer"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "exlb-sg"
+  }
+}
+
 resource "aws_security_group_rule" "exlb-http-ingress" {
   type              = "ingress"
   from_port         = 80
@@ -59,7 +79,17 @@ resource "aws_security_group_rule" "exlb-egress" {
   lifecycle { create_before_destroy = true }
 }
 
-# web-sg
+# web security group
+resource "aws_security_group" "web-sg" {
+  name        = "web-sg"
+  description = "security group of web server"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "web-sg"
+  }
+}
+
 resource "aws_security_group_rule" "web-ssh-ingress" {
   type              = "ingress"
   from_port         = 22
@@ -95,7 +125,17 @@ resource "aws_security_group_rule" "web-egress" {
   lifecycle { create_before_destroy = true }
 }
 
-# inlb-sg
+# internal load balancer security group
+resource "aws_security_group" "inlb-sg" {
+  name        = "inlb-sg"
+  description = "security group of internal load balancer"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "inlb-sg"
+  }
+}
+
 resource "aws_security_group_rule" "inlb-http-ingress" {
   type              = "ingress"
   from_port         = 8080
@@ -119,7 +159,17 @@ resource "aws_security_group_rule" "inlb-egress" {
   lifecycle { create_before_destroy = true }
 }
 
-# was-sg
+# was security group
+resource "aws_security_group" "was-sg" {
+  name        = "was-sg"
+  description = "security group of was"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "was-sg"
+  }
+}
+
 resource "aws_security_group_rule" "was-ssh-ingress" {
   type              = "ingress"
   from_port         = 22
@@ -155,7 +205,17 @@ resource "aws_security_group_rule" "was-egress" {
   lifecycle { create_before_destroy = true }
 }
 
-# db-sg
+# db security group
+resource "aws_security_group" "db-sg" {
+  name        = "db-sg"
+  description = "security group of db instances"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "db-sg"
+  }
+}
+
 resource "aws_security_group_rule" "db-ssh-ingress" {
   type              = "ingress"
   from_port         = 22

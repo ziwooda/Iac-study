@@ -1,1 +1,1 @@
-variable "key_tags" {}
+variable "key_div" {}
