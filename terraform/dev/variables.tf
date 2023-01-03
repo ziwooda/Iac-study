@@ -3,6 +3,12 @@ variable "env" {
   description = "dev"
 }
 
+variable "tags" {
+  type = string
+  default = "melody"
+  description = "key tags"
+}
+
 variable "user_alias" {
   type = string
   description = "iam_user_name"
@@ -19,8 +25,26 @@ variable "vpc_cidr_block" {
 }
 
 variable "azs" {
-  description = "availability zone in Seoul"
   type = list
-  # default = ["ap-northeast-2a", "ap-northeast-2c"]
+  description = "availability zone in Seoul"
 }
 
+variable "instance_type" {
+  type = string
+  description = "instance type of ec2"
+}
+
+# variable "key" {
+#   type = list
+#   description = "key for instances"
+# }
+
+variable "size" {
+  type = number
+  description = "ebs size"
+}
+
+variable "type" {
+  type = string
+  description = "ebs type"
+}
