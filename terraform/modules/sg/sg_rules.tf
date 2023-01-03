@@ -19,7 +19,7 @@ resource "aws_security_group_rule" "bastion-http-ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["${chomp(data.http.my_public_ip.body)}/32"]
+  cidr_blocks       = ["${chomp(data.http.my_public_ip.body)}/32"] # to-do: attribute 'body' deprecated
   security_group_id = "${aws_security_group.bastion-sg.id}"
 
   lifecycle { create_before_destroy = true }
