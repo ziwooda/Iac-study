@@ -1,0 +1,229 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for ec2 instances
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+  PublicKey:
+    Description: Name of an existing EC2 KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  PrivateKey:
+    Description: Name of an existing EC2 KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  # LatestAmiId:
+  #   Description: Select AMI
+  #   Type: List<AWS::EC2::Image::Id>
+  #   Default: ami-0eddbd81024d3fbdd
+  PublicSN1:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN1:
+    Description: Select an existing private subnet for web server1 (ap-northeast-2a)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN2:
+    Description: Select an existing private subnet for web server2 (ap-northeast-2c)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN3:
+    Description: Select an existing private subnet for was server1 (ap-northeast-2a)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN4:
+    Description: Select an existing private subnet for was server2 (ap-northeast-2c)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN5:
+    Description: Select an existing private subnet for db server1 (ap-northeast-2a)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN6:
+    Description: Select an existing private subnet for db server2 (ap-northeast-2c)
+    Type: AWS::EC2::Subnet::Id
+  BastionSG:
+    Description: Select an existing security group of bastion host
+    Type: AWS::EC2::SecurityGroup::Id
+  WebSG:
+    Description: Select an existing security group of web server
+    Type: AWS::EC2::SecurityGroup::Id
+  WasSG:
+    Description: Select an existing security group of was server
+    Type: AWS::EC2::SecurityGroup::Id
+  DBSG:
+    Description: Select an existing security group of db server
+    Type: AWS::EC2::SecurityGroup::Id
+
+Resources:
+  BastionEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PublicKey
+      Tags:
+        - Key: Name
+          Value: bastion host
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: BastionSG
+          SubnetId: !Ref PublicSN1
+
+  # 6-2. web server
+  Web1EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-web1"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WebSG
+          SubnetId: !Ref PrivateSN1
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          hostname ELB-Web1EC2
+          sudo yum install httpd -y
+          echo "<h1>Web Server 1</h1>" > /var/www/html/index.html
+          sudo systemctl start httpd
+
+  Web2EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-web2"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WebSG
+          SubnetId: !Ref PrivateSN2
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          hostname ELB-Web2EC2
+          sudo yum install httpd -y
+          echo "<h1>Web Server 2</h1>" > /var/www/html/index.html
+          sudo systemctl start httpd
+
+  # 6-3. was server
+  Was1EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-was1"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WasSG
+          SubnetId: !Ref PrivateSN3
+
+  Was2EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-was2"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: WasSG
+          SubnetId: !Ref PrivateSN4
+
+  # 6-4. db server
+  DB1EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-db1"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: DBSG
+          SubnetId: !Ref PrivateSN5
+
+  DB2EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      # ImageId: !Ref LatestAmiId
+      ImageId: ami-0eddbd81024d3fbdd
+      KeyName: !Ref PrivateKey
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-db2"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          GroupSet:
+            - Ref: DBSG
+          SubnetId: !Ref PrivateSN6
+
+Outputs:
+  outputBastionEC2:
+    Description: Reference of bastion host instance
+    Value: !Ref BastionEC2
+  outputWeb1EC2:
+    Description: Reference of web1 instance
+    Value: !Ref Web1EC2
+  outputWeb2EC2:
+    Description: Reference of web2 instance
+    Value: !Ref Web2EC2
+  outputWas1EC2:
+    Description: Reference of was1 instance
+    Value: !Ref Was1EC2
+  outputWas2EC2:
+    Description: Reference of was2 instance
+    Value: !Ref Was1EC2
+  outputDB1EC2:
+    Description: Reference of db1 instance
+    Value: !Ref DB1EC2
+  outputDB2EC2:
+    Description: Reference of db2 instance
+    Value: !Ref DB2EC2

@@ -7,34 +7,34 @@ Parameters:
   IGW:
     Description: Select an existing internet gateway
     Type: String
-    Default: "<internet-gateway-ID>" # should be modified when deploying new igw stack
+    Default: igw-0e7094c2543a3bbdb # should be modified when deploying new igw stack
   NGW:
     Description: Select an existing nat gateway
     Type: String
-    Default: "<nat-gateway-ID>" # should be modified when deploying new ngw stack
+    Default: nat-028a174e30be208bd # should be modified when deploying new ngw stack
   PublicSN1:
     Description: Select an existing public subnet for nat gateway
     Type: AWS::EC2::Subnet::Id
   PublicSN2:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing public subnet of ap-northeast-2c
     Type: AWS::EC2::Subnet::Id
   PrivateSN1:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing private subnet for web server1 (ap-northeast-2a)
     Type: AWS::EC2::Subnet::Id
   PrivateSN2:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing private subnet for web server2 (ap-northeast-2c)
     Type: AWS::EC2::Subnet::Id
   PrivateSN3:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing private subnet for was server1 (ap-northeast-2a)
     Type: AWS::EC2::Subnet::Id
   PrivateSN4:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing private subnet for was server2 (ap-northeast-2c)
     Type: AWS::EC2::Subnet::Id
   PrivateSN5:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing private subnet for db server1 (ap-northeast-2a)
     Type: AWS::EC2::Subnet::Id
   PrivateSN6:
-    Description: Select an existing public subnet for nat gateway
+    Description: Select an existing private subnet for db server2 (ap-northeast-2c)
     Type: AWS::EC2::Subnet::Id
 
 Resources:
