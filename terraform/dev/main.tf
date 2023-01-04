@@ -35,14 +35,31 @@ module "ec2" {
 
     bastion_sg = module.sg.bastion_sg_id
     bastion_subnet = module.network.public_subnet_id
-
     web_sg = module.sg.web_sg_id
     web_subnet = module.network.web_subnet_id
-
     was_sg = module.sg.was_sg_id
     was_subnet = module.network.was_subnet_id
-
     db_sg = module.sg.db_sg_id
     db_subnet = module.network.rds_subnet_id
 }
 
+module "db" {
+    source = "../modules/db"
+    env = var.env
+    availability_zone = module.network.availability_zone
+    db_identifier = var.database_name
+    db_subnet_ids = module.network.rds_subnet_id
+
+    db_storage_size = var.storage_size
+    db_engine = var.engine
+    db_engine_version = var.engine_version
+    instance_class = var.class
+    db_user = var.db_username
+    db_passwd = var.db_password
+    boolOption = var.bool
+    family = var.family
+    subnet_name = var.subnet_group_name
+    param_name = var.param_group_name
+    option_name = var.option_group_name
+    security_group_id = module.sg.db_sg_id
+}

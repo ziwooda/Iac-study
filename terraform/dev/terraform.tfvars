@@ -17,3 +17,16 @@ key = ["tf-public-key", "tf-private-key"]
 size = 50
 type = "gp2"
 
+# db
+storage_size = 20
+database_name = "tf_database"
+engine = "mariadb"
+engine_version = "10.6"
+class = "db.t3.micro"
+db_username = "admin"
+db_password = "ziwoo99!!"
+bool = [true, false]
+family = "mariadb10.6"
+subnet_group_name = "rds-subnet"
+param_group_name = "rds-param"
+option_group_name = "rds-option"

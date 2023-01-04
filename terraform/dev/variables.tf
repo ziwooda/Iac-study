@@ -48,3 +48,62 @@ variable "type" {
   description = "ebs type"
 }
 
+variable "database_name" {
+  type = string
+  description = "database name/identifier"
+}
+
+variable "storage_size" {
+  type = number
+  description = "allocated storage size of db instance"
+}
+
+variable "engine" {
+  type = string
+  description = "name of db engine"
+}
+
+variable "engine_version" {
+  type = string
+  description = "version of db engine"
+}
+
+variable "class" {
+  type = string
+  description = "db instance class"
+}
+
+variable "db_username" {
+  type = string
+  description = "username of database"
+}
+
+variable "db_password" {
+  type = string
+  description = "password of database"
+}
+
+variable "bool" {
+  type = list
+  description = "boolean value of database options"  
+}
+
+variable "family" {
+  type = string
+  description = "family name of db param group"
+}
+
+variable "subnet_group_name" {
+  type = string
+  description = "subnet group name for database"
+}
+
+variable "param_group_name" {
+  type = string
+  description = "param group name for database"
+}
+
+variable "option_group_name" {
+  type = string
+  description = "option group name for database"
+}
