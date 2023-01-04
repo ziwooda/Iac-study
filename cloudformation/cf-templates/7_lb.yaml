@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for security groups
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+  PublicSN1:
+    Description: Select an existing public subnet for nat gateway
+    Type: AWS::EC2::Subnet::Id
+  PublicSN2:
+    Description: Select an existing public subnet of ap-northeast-2c
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN1:
+    Description: Select an existing private subnet for web server1 (ap-northeast-2a)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN2:
+    Description: Select an existing private subnet for web server2 (ap-northeast-2c)
+    Type: AWS::EC2::Subnet::Id
+  EXLBSG:
+    Description: Select an existing security group of external load balancer
+    Type: AWS::EC2::SecurityGroup::Id
+  INLBSG:
+    Description: Select an existing security group of internal load balancer
+    Type: AWS::EC2::SecurityGroup::Id
+  Web1EC2:
+    Description: Select an existing ec2 instance of web server1 (ap-northeast-2a)
+    Type: AWS::EC2::Instance::Id
+  Web2EC2:
+    Description: Select an existing ec2 instance of web server2 (ap-northeast-2c)
+    Type: AWS::EC2::Instance::Id
+  Was1EC2:
+    Description: Select an existing ec2 instance of was server1 (ap-northeast-2a)
+    Type: AWS::EC2::Instance::Id
+  Was2EC2:
+    Description: Select an existing ec2 instance of was server2 (ap-northeast-2c)
+    Type: AWS::EC2::Instance::Id
+
+Resources:
+  ExLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: external-lb
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref EXLBSG
+      Subnets:
+        - !Ref PublicSN1
+        - !Ref PublicSN2
+  EXLBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthyThresholdCount: 3
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      Name: exlb-target
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      Targets:
+        - Id: !Ref Web1EC2
+          Port: 80
+        - Id: !Ref Web2EC2
+          Port: 80
+  EXLBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref EXLBTargetGroup
+      LoadBalancerArn: !Ref ExLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  INLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: internall-lb
+      Scheme: internal
+      SecurityGroups:
+        - !Ref INLBSG
+      Subnets:
+        - !Ref PrivateSN1
+        - !Ref PrivateSN2
+  INLBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthyThresholdCount: 3
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      Name: inlb-target
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      Targets:
+        - Id: !Ref Was1EC2
+          Port: 8080
+        - Id: !Ref Was2EC2
+          Port: 8080
+  INLBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref INLBTargetGroup
+      LoadBalancerArn: !Ref INLoadBalancer
+      Port: 8080
+      Protocol: HTTP
+
+Outputs:
+  outputExLoadBalancer:
+    Description: Reference of external load balancer
+    Value: !Ref ExLoadBalancer
+  outputEXLBTargetGroup:
+    Description: Reference of external load balancer target group
+    Value: !Ref EXLBTargetGroup
+  outputINLoadBalancer:
+    Description: Reference of internal load balancer
+    Value: !Ref INLoadBalancer
+  outputINLBTargetGroup:
+    Description: Reference of internal load balancer target group
+    Value: !Ref INLBTargetGroup

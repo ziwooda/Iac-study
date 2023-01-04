@@ -7,11 +7,11 @@ Parameters:
   IGW:
     Description: Select an existing internet gateway
     Type: String
-    Default: igw-0e7094c2543a3bbdb # should be modified when deploying new igw stack
+    Default: "<internet-gateway-ID>" # should be modified when deploying new igw stack
   NGW:
     Description: Select an existing nat gateway
     Type: String
-    Default: nat-028a174e30be208bd # should be modified when deploying new ngw stack
+    Default: "<nat-gateway-ID>" # should be modified when deploying new ngw stack
   PublicSN1:
     Description: Select an existing public subnet for nat gateway
     Type: AWS::EC2::Subnet::Id
