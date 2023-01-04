@@ -1,0 +1,16 @@
+variable "env" {}
+variable "db_identifier" {}
+variable "db_subnet_ids" {}
+variable "db_storage_size" {}
+variable "db_engine" {}
+variable "db_engine_version" {}
+variable "instance_class" {}
+variable "db_user" {}
+variable "db_passwd" {}
+variable "boolOption" {}
+variable "availability_zone" {}
+variable "family" {}
+variable "subnet_name" {}
+variable "param_name" {}
+variable "option_name" {}
+variable "security_group_id" {}
