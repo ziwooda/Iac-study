@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: template for database(RDS)
+Parameters:
+  VPC:
+    Description: Select an existing VPC
+    Type: AWS::EC2::VPC::Id
+  DB1EC2:
+    Description: Select an existing ec2 instance of was server1 (ap-northeast-2a)
+    Type: AWS::EC2::Instance::Id
+  DBSG:
+    Description: Select an existing security group of db server1 (ap-northeast-2a)
+    Type: AWS::EC2::SecurityGroup::Id
+  PrivateSN5:
+    Description: Select an existing private subnet for db server1 (ap-northeast-2a)
+    Type: AWS::EC2::Subnet::Id
+  PrivateSN6:
+    Description: Select an existing private subnet for db server2 (ap-northeast-2c)
+    Type: AWS::EC2::Subnet::Id
+  DBInstanceClass:
+    Default: db.t3.micro
+    Description: DB instance class
+    Type: String
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.large
+      - db.t3.xlarge
+      - db.t3.2xlarge
+      - db.t3.4xlarge
+      - db.t3.8xlarge
+
+Resources:
+  DBParamGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      DBParameterGroupName: rds-param
+      Description: parameter group for mariadb database
+      Family: mariadb10.6
+      Parameters:
+        time_zone: Asia/Seoul
+        character_set_client: utf8mb4
+        character_set_connection: utf8mb4
+        character_set_database: utf8mb4
+        character_set_filesystem: utf8mb4
+        character_set_results: utf8mb4
+        character_set_server: utf8mb4
+        collation_connection: utf8mb4_general_ci
+        collation_server: utf8mb4_general_ci
+        max_connections: 150
+      Tags:
+        - Key: Name
+          Value: rds-param
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: subnet group for mariadb database
+      DBSubnetGroupName: rds-subnet
+      SubnetIds:
+        - !Ref PrivateSN5
+        - !Ref PrivateSN6
+      Tags:
+        - Key: Name
+          Value: rds-subnet
+
+  DBOptionGroup:
+    Type: AWS::RDS::OptionGroup
+    Properties:
+      EngineName: mariadb
+      MajorEngineVersion: 10.6
+      OptionGroupDescription: option group for mariadb database
+      OptionGroupName: rds-option
+      Tags:
+        - Key: Name
+          Value: rds-option
+
+  DB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: cf-rds
+      DBName: cf_database
+      Engine: mariadb
+      AvailabilityZone: ap-northeast-2a
+      # MultiAZ: true
+      VPCSecurityGroups:
+        - Ref: DBSG
+      AllocatedStorage: 20
+      MaxAllocatedStorage: 60
+      DBInstanceClass: !Ref DBInstanceClass
+      MasterUsername: admin
+      MasterUserPassword: admin2023!!
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBParameterGroupName: !Ref DBParamGroup
+      OptionGroupName: !Ref DBOptionGroup
+      BackupRetentionPeriod: 7
+    DeletionPolicy: Snapshot
