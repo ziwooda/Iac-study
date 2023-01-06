@@ -11,9 +11,20 @@ Parameters:
     Description: Select AMI
     Type: List<AWS::EC2::Image::Id>
     Default: ami-0eddbd81024d3fbdd
+  DBInstanceClass:
+    Default: db.t3.micro
+    Description: DB instance class
+    Type: String
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.large
+      - db.t3.xlarge
+      - db.t3.2xlarge
+      - db.t3.4xlarge
+      - db.t3.8xlarge
 
 Resources:
-  # 1. vpc
+  # 1. vpc, internet gateway
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -26,8 +37,6 @@ Resources:
             - ""
             - - !Ref AWS::StackName
               - "-vpc"
-
-  # 2. internet gateway
   IGW:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -37,14 +46,13 @@ Resources:
             - ""
             - - !Ref AWS::StackName
               - "-igw"
-
   IGWAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref IGW
       VpcId: !Ref VPC
 
-  # 3. route table
+  # 2. route table
   PublicRT:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -52,7 +60,6 @@ Resources:
       Tags:
         - Key: Name
           Value: public-rt
-
   PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: IGWAttachment
@@ -60,7 +67,6 @@ Resources:
       RouteTableId: !Ref PublicRT
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref IGW
-
   PrivateRT:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -68,7 +74,6 @@ Resources:
       Tags:
         - Key: Name
           Value: private-rt
-
   PrivateRoute:
     Type: AWS::EC2::Route
     DependsOn: NGW
@@ -77,8 +82,8 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NGW
 
-  # 4. Subnet
-  # 4-1. public subnet
+  # 3. Subnet
+  # 3-1. public subnet
   PublicSN1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -88,7 +93,6 @@ Resources:
       Tags:
         - Key: Name
           Value: pub-subnet1
-
   PublicSN2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -101,21 +105,19 @@ Resources:
       Tags:
         - Key: Name
           Value: pub-subnet2
-
   PublicSNRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRT
       SubnetId: !Ref PublicSN1
-
   PublicSNRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRT
       SubnetId: !Ref PublicSN2
 
-  # 4-2. private subnet
-  # 4-2-1. web server
+  # 3-2. private subnet
+  # 3-2-1. web server
   PrivateSN1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -125,7 +127,6 @@ Resources:
       Tags:
         - Key: Name
           Value: pri-subnet1
-
   PrivateSN2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -138,20 +139,18 @@ Resources:
       Tags:
         - Key: Name
           Value: pri-subnet2
-
   PrivateSNRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT
       SubnetId: !Ref PrivateSN1
-
   PrivateSNRouteTableAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT
       SubnetId: !Ref PrivateSN2
 
-  # 4-2-2. was server
+  # 3-2-2. was server
   PrivateSN3:
     Type: AWS::EC2::Subnet
     Properties:
@@ -161,7 +160,6 @@ Resources:
       Tags:
         - Key: Name
           Value: pri-subnet3
-
   PrivateSN4:
     Type: AWS::EC2::Subnet
     Properties:
@@ -174,20 +172,18 @@ Resources:
       Tags:
         - Key: Name
           Value: pri-subnet4
-
   PrivateSNRouteTableAssociation3:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT
       SubnetId: !Ref PrivateSN3
-
   PrivateSNRouteTableAssociation4:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT
       SubnetId: !Ref PrivateSN4
 
-  # 4-2-3. db server
+  # 3-2-3. db server
   PrivateSN5:
     Type: AWS::EC2::Subnet
     Properties:
@@ -197,7 +193,6 @@ Resources:
       Tags:
         - Key: Name
           Value: pri-subnet5
-
   PrivateSN6:
     Type: AWS::EC2::Subnet
     Properties:
@@ -210,21 +205,19 @@ Resources:
       Tags:
         - Key: Name
           Value: pri-subnet6
-
   PrivateSNRouteTableAssociation5:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT
       SubnetId: !Ref PrivateSN5
-
   PrivateSNRouteTableAssociation6:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRT
       SubnetId: !Ref PrivateSN6
 
-  # 5. security group
-  # 5-1. bastion security group
+  # 4. security group
+  # 4-1. bastion security group
   BastionSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -243,7 +236,7 @@ Resources:
           ToPort: "22"
           CidrIp: 0.0.0.0/0
 
-  # 5-2. ex-lb security group
+  # 4-2. ex-lb security group
   EXLBSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -258,7 +251,7 @@ Resources:
           ToPort: "80"
           CidrIp: 0.0.0.0/0
 
-  # 5-3. web security group
+  # 4-3. web security group
   WebSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -277,7 +270,7 @@ Resources:
           ToPort: "22"
           SourceSecurityGroupId: !Ref BastionSG
 
-  # 5-4. in-lb security group
+  # 4-4. in-lb security group
   INLBSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -292,7 +285,7 @@ Resources:
           ToPort: "8080"
           SourceSecurityGroupId: !Ref WebSG
 
-  # 5-5. was security group
+  # 4-5. was security group
   WasSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -311,7 +304,7 @@ Resources:
           ToPort: "22"
           SourceSecurityGroupId: !Ref BastionSG
 
-  # 5-6. db security group
+  # 4-6. db security group
   DBSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -330,8 +323,8 @@ Resources:
           ToPort: "22"
           SourceSecurityGroupId: !Ref BastionSG
 
-  # 6. EC2 instance
-  # 6-1. bastion host
+  # 5. EC2 instance
+  # 5-1. bastion host
   BastionEC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -349,7 +342,7 @@ Resources:
             - Ref: BastionSG
           SubnetId: !Ref PublicSN1
 
-  # 6-2. web server
+  # 5-2. web server
   Web1EC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -376,7 +369,6 @@ Resources:
           sudo yum install httpd -y
           echo "<h1>Web Server 1</h1>" > /var/www/html/index.html
           sudo systemctl start httpd
-
   Web2EC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -404,7 +396,7 @@ Resources:
           echo "<h1>Web Server 2</h1>" > /var/www/html/index.html
           sudo systemctl start httpd
 
-  # 6-3. was server
+  # 5-3. was server
   Was1EC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -424,7 +416,6 @@ Resources:
           GroupSet:
             - Ref: WasSG
           SubnetId: !Ref PrivateSN3
-
   Was2EC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -445,7 +436,7 @@ Resources:
             - Ref: WasSG
           SubnetId: !Ref PrivateSN4
 
-  # 6-4. db server
+  # 5-4. db server
   DB1EC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -465,7 +456,6 @@ Resources:
           GroupSet:
             - Ref: DBSG
           SubnetId: !Ref PrivateSN5
-
   DB2EC2:
     Type: AWS::EC2::Instance
     Properties:
@@ -486,13 +476,11 @@ Resources:
             - Ref: DBSG
           SubnetId: !Ref PrivateSN6
 
-  # 7. EIP
-  # 7-1. nat gateway
+  # 6. eip, nat gateway
   EIPforNat:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-
   NGW:
     Type: AWS::EC2::NatGateway
     DependsOn: IGWAttachment
@@ -503,8 +491,8 @@ Resources:
         - Key: Name
           Value: 3tier-nat
 
-  # 8. load balancer
-  # 8-1. external load balancer
+  # 7. load balancer
+  # 7-1. external load balancer
   ExLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -515,7 +503,6 @@ Resources:
       Subnets:
         - !Ref PublicSN1
         - !Ref PublicSN2
-
   EXLBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -532,7 +519,6 @@ Resources:
           Port: 80
         - Id: !Ref Web2EC2
           Port: 80
-
   EXLBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -543,7 +529,7 @@ Resources:
       Port: 80
       Protocol: HTTP
 
-  # 8-2. internal load balancer
+  # 7-2. internal load balancer
   INLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -554,7 +540,6 @@ Resources:
       Subnets:
         - !Ref PrivateSN1
         - !Ref PrivateSN2
-
   INLBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -571,7 +556,6 @@ Resources:
           Port: 8080
         - Id: !Ref Was2EC2
           Port: 8080
-
   INLBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -581,3 +565,67 @@ Resources:
       LoadBalancerArn: !Ref INLoadBalancer
       Port: 8080
       Protocol: HTTP
+
+  # 8. database | RDS
+  DBParamGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      DBParameterGroupName: rds-param
+      Description: parameter group for mariadb database
+      Family: mariadb10.6
+      Parameters:
+        time_zone: Asia/Seoul
+        character_set_client: utf8mb4
+        character_set_connection: utf8mb4
+        character_set_database: utf8mb4
+        character_set_filesystem: utf8mb4
+        character_set_results: utf8mb4
+        character_set_server: utf8mb4
+        collation_connection: utf8mb4_general_ci
+        collation_server: utf8mb4_general_ci
+        max_connections: 150
+      Tags:
+        - Key: Name
+          Value: rds-param
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: subnet group for mariadb database
+      DBSubnetGroupName: rds-subnet
+      SubnetIds:
+        - !Ref PrivateSN5
+        - !Ref PrivateSN6
+      Tags:
+        - Key: Name
+          Value: rds-subnet
+  DBOptionGroup:
+    Type: AWS::RDS::OptionGroup
+    Properties:
+      EngineName: mariadb
+      MajorEngineVersion: 10.6
+      OptionGroupDescription: option group for mariadb database
+      OptionGroupName: rds-option
+      Tags:
+        - Key: Name
+          Value: rds-option
+
+  DB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: cf-rds
+      DBName: cf_database
+      Engine: mariadb
+      AvailabilityZone: ap-northeast-2a
+      # MultiAZ: true
+      VPCSecurityGroups:
+        - Ref: DBSG
+      AllocatedStorage: 20
+      MaxAllocatedStorage: 60
+      DBInstanceClass: !Ref DBInstanceClass
+      MasterUsername: admin
+      MasterUserPassword: admin2023!!
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBParameterGroupName: !Ref DBParamGroup
+      OptionGroupName: !Ref DBOptionGroup
+      BackupRetentionPeriod: 7
+    DeletionPolicy: Snapshot
