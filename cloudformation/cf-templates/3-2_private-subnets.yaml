@@ -23,7 +23,7 @@ Resources:
         Fn::Select:
           - 1
           - Fn::GetAZs: ""
-      CidrBlock: 10.0.3.0/24
+      CidrBlock: 10.0.12.0/24
       Tags:
         - Key: Name
           Value: pri-subnet2
@@ -32,7 +32,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: ap-northeast-2a
-      CidrBlock: 10.0.4.0/24
+      CidrBlock: 10.0.3.0/24
       Tags:
         - Key: Name
           Value: pri-subnet3
@@ -44,7 +44,7 @@ Resources:
         Fn::Select:
           - 1
           - Fn::GetAZs: ""
-      CidrBlock: 10.0.12.0/24
+      CidrBlock: 10.0.13.0/24
       Tags:
         - Key: Name
           Value: pri-subnet4
@@ -53,7 +53,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: ap-northeast-2a
-      CidrBlock: 10.0.13.0/24
+      CidrBlock: 10.0.4.0/24
       Tags:
         - Key: Name
           Value: pri-subnet5
