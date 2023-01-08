@@ -17,6 +17,7 @@ resource "aws_db_option_group" "rds-option" {
 
 resource "aws_db_parameter_group" "rds-param" {
   name   = var.param_name
+  option_group_description = "rds parameter group for mariadb database"
   family = var.family
 
   parameter {
@@ -82,13 +83,13 @@ resource "aws_db_instance" "tf-db" {
   instance_class       = var.instance_class
   username             = var.db_user
   password             = var.db_passwd
-  availability_zone = "${element(var.availability_zone, 0)}"
+  multi_az = "${element(var.boolOption, 0)}"
+  # availability_zone = "${element(var.availability_zone, 0)}"
   db_subnet_group_name = aws_db_subnet_group.rds-subnet.name
   parameter_group_name = aws_db_parameter_group.rds-param.name
   option_group_name = aws_db_option_group.rds-option.name
   vpc_security_group_ids = [var.security_group_id]
   apply_immediately = "${element(var.boolOption, 0)}"
   skip_final_snapshot  = "${element(var.boolOption, 0)}"
-  multi_az = "${element(var.boolOption, 0)}"
   backup_retention_period = "7"
 }

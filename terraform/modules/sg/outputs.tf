@@ -6,8 +6,16 @@ output "bastion_sg_id" {
   value = aws_security_group.bastion-sg.id
 }
 
+output "exlb_sg_id" {
+  value = aws_security_group.exlb-sg.id
+}
+
 output "web_sg_id" {
   value = aws_security_group.web-sg.id
+}
+
+output "inlb_sg_id" {
+  value = aws_security_group.inlb-sg.id
 }
 
 output "was_sg_id" {
