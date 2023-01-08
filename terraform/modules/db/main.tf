@@ -17,7 +17,7 @@ resource "aws_db_option_group" "rds-option" {
 
 resource "aws_db_parameter_group" "rds-param" {
   name   = var.param_name
-  option_group_description = "rds parameter group for mariadb database"
+  description = "rds parameter group for mariadb database"
   family = var.family
 
   parameter {
