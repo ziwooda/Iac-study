@@ -5,7 +5,7 @@ resource "aws_lb" "tf-exlb" {
   security_groups    = [var.ex_sg_id]
   subnets            = var.ex_subnet_ids
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = {
     Environment = "${var.env}"
@@ -59,7 +59,7 @@ resource "aws_lb" "tf-inlb" {
   security_groups    = [var.in_sg_id]
   subnets            = var.in_subnet_ids
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = {
     Environment = "${var.env}"

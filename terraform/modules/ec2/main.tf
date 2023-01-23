@@ -49,7 +49,36 @@ resource "aws_instance" "bastion-host" {
   }
 }
 
+data "template_file" "user_data" {
+  template = "${file(var.nginx)}"
+}
+
 # web instances
+resource "aws_instance" "tf-web" {
+  count         = "${length(var.availability_zone)}"
+  ami           = data.aws_ami.tf-ami.id
+  instance_type = var.instance_type
+  vpc_security_group_ids = [var.web_sg]
+
+  availability_zone = "${element(var.availability_zone, count.index)}"
+  subnet_id = "${element(var.web_subnet, count.index)}"
+  key_name  = "${element(var.key, 1)}"
+
+  root_block_device {
+    volume_size = var.ebs_size
+    volume_type = var.ebs_type
+    tags = {
+      "Name" = "${var.env}-web-volume-${count.index+1}"
+    }
+  }
+  user_data = "${data.template_file.user_data.rendered}"
+ 
+  tags = {
+    "Name" = "${var.env}-web-${count.index+1}"
+  }
+}
+
+# was instances
 resource "aws_instance" "tf-was" {
   count         = "${length(var.availability_zone)}"
   ami           = data.aws_ami.tf-ami.id
@@ -75,7 +104,7 @@ resource "aws_instance" "tf-was" {
   }
 }
 
-# was instances
+# db instances
 resource "aws_instance" "tf-db" {
   count         = "${length(var.availability_zone)}"
   ami           = data.aws_ami.tf-ami.id
@@ -98,29 +127,5 @@ resource "aws_instance" "tf-db" {
 
   tags = {
     "Name" = "${var.env}-db-${count.index+1}"
-  }
-}
-
-# db instances
-resource "aws_instance" "tf-web" {
-  count         = "${length(var.availability_zone)}"
-  ami           = data.aws_ami.tf-ami.id
-  instance_type = var.instance_type
-  vpc_security_group_ids = [var.web_sg]
-
-  availability_zone = "${element(var.availability_zone, count.index)}"
-  subnet_id = "${element(var.web_subnet, count.index)}"
-  key_name  = "${element(var.key, 1)}"
-
-  root_block_device {
-    volume_size = var.ebs_size
-    volume_type = var.ebs_type
-    tags = {
-      "Name" = "${var.env}-web-volume-${count.index+1}"
-    }
-  }
-
-  tags = {
-    "Name" = "${var.env}-web-${count.index+1}"
   }
 }

@@ -48,6 +48,11 @@ variable "type" {
   description = "ebs type"
 }
 
+variable "nginx_user_data" {
+  type = string
+  description = "user data for nginx"
+}
+
 variable "database_name" {
   type = string
   description = "database name/identifier"

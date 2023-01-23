@@ -16,6 +16,7 @@ instance_type = "t2.micro"
 key = ["tf-public-key", "tf-private-key"]
 size = 50
 type = "gp2"
+nginx_user_data = "/Users/ziwoo/Documents/GitHub/Iac-study/terraform/modules/ec2/nginx.sh"
 
 # db
 storage_size = 20
