@@ -79,7 +79,7 @@ resource "aws_instance" "tf-web" {
   sudo yum install -y httpd
   sudo systemctl start httpd
   sudo chmod 777 -R /var/www/html
-  echo "<h2>nginx installed by terraform</h2>" > /var/www/html/index.html
+  echo "<h2>apache server installed by terraform</h2>" > /var/www/html/index.html
   sudo systemctl enable httpd
   EOF
  
