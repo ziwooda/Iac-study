@@ -32,7 +32,7 @@ module "ec2" {
     key = var.key
     ebs_size = var.size
     ebs_type = var.type
-    nginx = var.nginx_user_data
+    # nginx = var.nginx_user_data
 
     bastion_sg = module.sg.bastion_sg_id
     bastion_subnet = module.network.public_subnet_id

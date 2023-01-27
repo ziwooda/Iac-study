@@ -49,9 +49,9 @@ resource "aws_instance" "bastion-host" {
   }
 }
 
-data "template_file" "user_data" {
-  template = "${file(var.nginx)}"
-}
+# data "template_file" "user_data" {
+#   template = "${file(var.nginx)}"
+# }
 
 # web instances
 resource "aws_instance" "tf-web" {
@@ -71,7 +71,17 @@ resource "aws_instance" "tf-web" {
       "Name" = "${var.env}-web-volume-${count.index+1}"
     }
   }
-  user_data = "${data.template_file.user_data.rendered}"
+  # user_data = "${data.template_file.user_data.rendered}"
+  user_data = <<-EOF
+  #!/bin/bash
+  echo "*** Installing apache2"
+  sudo yum update -y
+  sudo yum install -y httpd
+  sudo systemctl start httpd
+  sudo chmod 777 -R /var/www/html
+  echo "<h2>nginx installed by terraform</h2>" > /var/www/html/index.html
+  sudo systemctl enable httpd
+  EOF
  
   tags = {
     "Name" = "${var.env}-web-${count.index+1}"
