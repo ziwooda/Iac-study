@@ -2,10 +2,10 @@ terraform {
   required_providers {
     aws = {
       version = ">= 2.7.0"
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
     }
     serverscom = {
-      source = "serverscom/serverscom"
+      source  = "serverscom/serverscom"
       version = "0.3.0"
     }
   }
