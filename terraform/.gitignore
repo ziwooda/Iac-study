@@ -96,5 +96,11 @@ terragrunt-debug.tfvars.json
 # Ignore all local history of files
 .history
 .ionide
+cloudformation/.DS_Store
+terraform/dev/tf-private-key.pem
+.gitignore
+terraform/dev/tf-public-key.pem
+terraform/dev/.terraform.lock.hcl
+.terraform
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,terraform,terragrunt
