@@ -8,7 +8,7 @@ resource "aws_iam_role" "tf_iam_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Sid    = ""
-        Principal = { "AWS": "325230308203" }
+        Principal = { "AWS": "944371408142" }
       },
     ]
   })
