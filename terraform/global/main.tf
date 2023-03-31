@@ -1,8 +1,6 @@
-# S3&Dynamodb settings for all resources
-
 # S3 backend
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "${var.env}-${var.user_alias}-terraform-remote-state"
+  bucket = "terraform-remote-state-camezii"
 
   # 실수로 S3 버킷 삭제되는 것 방지
   lifecycle {
@@ -28,3 +26,11 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
     type = "S"
   }
 }
+
+# output "s3_bucket" {
+#   value = aws_s3_bucket.tfstate.arn
+# }
+
+# output "dynamodb_lock" {
+#   value = aws_dynamodb_table.terraform_state_lock.arn
+# }
