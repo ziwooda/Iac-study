@@ -1,6 +1,6 @@
 # vpc
 resource "aws_vpc" "tf-vpc" {
-  cidr_block       = "${var.cidr_block}"
+  cidr_block       = "${var.vpc_cidr}"
 #   instance_tenancy = "default"
 
   tags = {
