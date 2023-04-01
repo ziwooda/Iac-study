@@ -1,5 +1,9 @@
 env = "dev"
 
+# s3 backend
+remote_state_backend = "terraform-remote-state-camezii"
+backend_key          = "terraform.tfstate"
+
 # iam
 user_alias  = "tfuser"
 group_alias = "Terraform"

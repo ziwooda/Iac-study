@@ -3,6 +3,16 @@ variable "env" {
   description = "dev"
 }
 
+variable "remote_state_backend" {
+  type        = string
+  description = "s3 bucket name for remote state"
+}
+
+variable "backend_key" {
+  type        = string
+  description = "backend key"
+}
+
 variable "div" {
   type        = list(any)
   description = "key division"
